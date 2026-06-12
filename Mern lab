@@ -1,0 +1,240 @@
+Program 01
+Using MongoDB, create a collection called transactions in database usermanaged (drop if it already exists) and bulk load the data from a json file, transactions.json b. Upsert the record from the new file called transactions_upsert.json in Mongodb.
+
+Insert.js
+import {MongoClient} from "mongodb";
+import fs from "fs";
+const url="mongodb://localhost:27017";
+const insert = JSON.parse(fs.readFileSync("data.json"));
+const client =new MongoClient(url);
+const db=client.db("usermanaged");
+client.connect();
+console.log("Connected successfully");
+const collection=db.collection("transactions");
+const result=await collection.insertMany(insert);
+console.log(`Inserted ${result.insertedCount} collection`);
+client.close();
+
+upsert.js
+import { MongoClient } from "mongodb";
+import fs from "fs";
+const url = "mongodb://localhost:27017";
+const data = JSON.parse(fs.readFileSync("data.json")); 
+const client = new MongoClient(url);
+client.connect();
+console.log("Connected successfully");
+const db = client.db("usermanaged");
+const collection = db.collection("transactions");
+const result = await collection.deleteMany({ $or: data });
+console.log(`Deleted ${result.deletedCount} documents`);
+client.close();
+    
+data.json
+[
+  {
+    "_id": 1,
+    "name": "Transaction 1",
+    "amount": 100
+  },
+  {
+    "_id": 2,
+    "name": "Transaction 2",
+    "amount": 200
+  },
+  {
+    "_id": 3,
+    "name": "Transaction 3",
+    "amount": 300
+  }
+]
+
+
+
+Program 02
+Query MongoDB with Conditions: [Create appropriate collection with necessary documents to answer the query] 
+a. Find any record where Name is Somu
+ b. Find any record where total payment amount (Payment.Total) is 600. 
+c. Find any record where price (Transaction.price) is between 300 to 500. 
+d. Calculate the total transaction amount by adding up Payment.Total in all records.
+
+Data.json
+[
+    {	
+        "Name": "Somu",
+        "Transaction": { "price": 400 },
+        "Payment": { "Total": 600 }
+    },
+    {
+        "Name": "Ravi",
+        "Transaction": { "price": 350 },
+        "Payment": { "Total": 500 }
+    },
+    {
+        "Name": "Anita",
+        "Transaction": { "price": 700 },
+        "Payment": { "Total": 300 }
+    },
+    {
+        "Name": "Rahul",
+        "Transaction": { "price": 450 },
+        "Payment": { "Total": 600 }
+    }
+]
+
+Queries:
+db.transaction.find({ "Name": "Somu" });
+db.transaction.find({ "Payment.Total": 600 });
+db.transaction.find({ "Transaction.price": { $gte: 300, $lte: 500 } });
+db.transaction.aggregate9([
+{ $group: { _id: null, totalAmount: { $sum: "$Payment.Total" }} }
+]);
+
+
+
+Program 03 
+a. Write a program to check request header for cookies.
+b. write node.js program to print the a car object properties, delete the second property and get length of the object.
+
+Cookie.js
+async function fetchWithCookies(url) { 
+    const response = await fetch(url, { method: 'GET',  credentials: 
+    'include'  }); 
+    const cookies = response.headers.get('set-cookie'); 
+    console.log(cookies); 
+    } 
+    const url = 'https://google.com';
+    fetchWithCookies(url); 
+    
+b   car.js
+let car = {
+    brand: "Toyota",
+    model: "Camry",
+    year: 2022,
+    color: "Blue"
+  };
+console.log("Before:", car);
+let keys = Object.keys(car);
+if (keys[1]) delete car[keys[1]];
+console.log("After:", car);
+console.log("Count:", Object.keys(car).length);
+
+
+
+
+Program 04 
+a. Read the data of a student containing usn, name, sem, year_of_admission from node js and store it in the mongodb
+b. For a partial name given in node js, search all the names from mongodb student documents created in Question(a)
+
+import {MongoClient} from "mongodb";
+import fs from "fs";
+const url="mongodb://localhost:27017";
+const insert = JSON.parse(fs.readFileSync("data.json"));
+const client =new MongoClient(url);
+const db=client.db("abc");
+client.connect();
+console.log("Connected successfully");
+const collection=db.collection("transactions");
+const result=await collection.insertMany(insert);
+console.log(`Inserted ${result.insertedCount} collection`);
+client.close();
+
+data.json
+[
+  {
+    "usn": "1ABCD123",
+    "name": "John Doe",
+    "sem": 3,
+    "year_of_admission": 2022
+  },
+  {
+    "usn": "2EFGH456",
+name": "Jane Smith",
+    "sem": 4,
+
+    "year_of_admission": 2021
+  },
+  {
+    "usn": "3IJKL789",
+    "name": "Alice Johnson",
+    "sem": 2,
+    "year_of_admission": 2023
+  }
+]
+
+b - Partial.js
+const { MongoClient } = require("mongodb");
+const partialName = process.argv[2]; 
+const url = "mongodb://localhost:27017";
+const dbName = "abc";
+async function searchStudents() {
+  const client = await MongoClient.connect(url);
+  const students = await client
+    .db(dbName)
+    .collection("transactions")
+    .find({ name: { $regex: partialName, $options: "i" } })
+    .toArray();
+
+  console.log(students);
+  client.close();
+}
+searchStudents();
+
+
+Program 05
+
+Implement all CRUD operations on a File System using Node JS
+
+const fs = require('fs');
+const path = require('path');
+
+const filePath = path.join(__dirname, 'sample.txt');
+
+// CREATE
+function createFile(content) {
+fs.writeFileSync(filePath, content);
+console.log('File created successfully.');
+}
+
+// READ
+function readFile() {
+  if (fs.existsSync(filePath)) {
+    const data = fs.readFileSync(filePath, 'utf8');
+console.log('File Content:', data);
+  } else {
+console.log('File does not exist.');
+  }
+}
+
+// UPDATE (Append)
+function updateFile(newContent) {
+  if (fs.existsSync(filePath)) {
+fs.appendFileSync(filePath, `\n${newContent}`);
+console.log('File updated (appended).');
+} else {
+console.log('File does not exist.');
+  }
+}
+
+// DELETE
+function deleteFile() {
+  if (fs.existsSync(filePath)) {
+fs.unlinkSync(filePath);
+console.log('File deleted successfully.');
+  } else {
+console.log('File does not exist.');
+  }
+}
+
+// Demo
+createFile("This is the original content.");
+readFile();
+updateFile("This is the appended content.");
+readFile();
+deleteFile();
+
+
+
+
+
+
+
